@@ -6,7 +6,7 @@ const register = async (username: string) => {
 };
 
 const login = async (username: string) => {
-  const user = await User.findOne({ username });
+  const user = await User.exists({ username });
   if (!user) await register(username);
   console.log(`User logged in: ${username}`);
 };

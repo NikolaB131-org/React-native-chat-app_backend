@@ -3,6 +3,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import helmet from 'helmet';
 import authRouter from './routes/auth';
+import chatRouter from './routes/chat';
 import errorMiddleware from './middlewares/error/errorMiddleware';
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
@@ -13,6 +14,7 @@ app.use(helmet());
 app.use(express.json());
 
 app.use('/auth', authRouter);
+app.use('/chat', chatRouter);
 
 app.use(errorMiddleware);
 
