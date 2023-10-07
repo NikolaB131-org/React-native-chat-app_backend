@@ -8,7 +8,9 @@ export type IUser = {
 
 const userSchema = new Schema<IUser>({
   username: { type: String, required: true },
-  joinedChats: [{ type: Schema.Types.ObjectId, ref: 'Chat' }],
+  joinedChats: [{ type: Schema.Types.ObjectId, ref: 'Chat', required: true }],
 });
 
-export default model<IUser>('User', userSchema);
+const User = model<IUser>('User', userSchema);
+
+export default User;
