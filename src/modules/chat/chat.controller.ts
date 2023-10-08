@@ -13,46 +13,46 @@ const getInfo = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
-  const { username } = req.body;
+  const userId = req.headers.authorization?.split(' ')[1];
   const name = req.query.name?.toString();
-  if (!username || !name) {
-    next(ApiError.badRequest('Username and chat name are required'));
+  if (!userId || !name) {
+    next(ApiError.badRequest('User id and chat name are required'));
     return;
   }
-  await chatService.create(username, name);
+  await chatService.create(userId, name);
   res.sendStatus(200);
 };
 
 const deleteChat = async (req: Request, res: Response, next: NextFunction) => {
-  const { username } = req.body;
+  const userId = req.headers.authorization?.split(' ')[1];
   const { id } = req.params;
-  if (!username || !id) {
-    next(ApiError.badRequest('Username and chat id are required'));
+  if (!userId || !id) {
+    next(ApiError.badRequest('User id and chat id are required'));
     return;
   }
-  await chatService.deleteChat(username, id);
+  await chatService.deleteChat(userId, id);
   res.sendStatus(200);
 };
 
 const join = async (req: Request, res: Response, next: NextFunction) => {
-  const { username } = req.body;
+  const userId = req.headers.authorization?.split(' ')[1];
   const { id } = req.params;
-  if (!username || !id) {
-    next(ApiError.badRequest('Username and chat id are required'));
+  if (!userId || !id) {
+    next(ApiError.badRequest('User id and chat id are required'));
     return;
   }
-  await chatService.join(username, id);
+  await chatService.join(userId, id);
   res.sendStatus(200);
 };
 
 const leave = async (req: Request, res: Response, next: NextFunction) => {
-  const { username } = req.body;
+  const userId = req.headers.authorization?.split(' ')[1];
   const { id } = req.params;
-  if (!username || !id) {
-    next(ApiError.badRequest('Username and chat id are required'));
+  if (!userId || !id) {
+    next(ApiError.badRequest('User id and chat id are required'));
     return;
   }
-  await chatService.leave(username, id);
+  await chatService.leave(userId, id);
   res.sendStatus(200);
 };
 

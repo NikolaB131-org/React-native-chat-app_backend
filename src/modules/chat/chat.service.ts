@@ -8,8 +8,8 @@ const getInfo = async (id: string) => {
   return chat.populate({ path: 'users', select: '_id username' });
 };
 
-const create = async (username: string, chatName: string) => {
-  const user = await User.findOne({ username });
+const create = async (userId: string, chatName: string) => {
+  const user = await User.findById(userId)
   if (!user) return;
 
   const chat = await Chat.create({ imageUrl: 'image.url', name: chatName, creatorId: user, users: [user] });
@@ -17,8 +17,8 @@ const create = async (username: string, chatName: string) => {
   await user.save();
 };
 
-const deleteChat = async (username: string, chatId: string) => {
-  const user = await User.findOne({ username });
+const deleteChat = async (userId: string, chatId: string) => {
+  const user = await User.findById(userId);
   const chat = await Chat.findById(chatId);
   if (!user || !chat || !chat.creatorId.equals(user._id)) return;
 
@@ -27,8 +27,8 @@ const deleteChat = async (username: string, chatId: string) => {
   await Chat.deleteOne({ _id: chat });
 };
 
-const join = async (username: string, chatId: string) => {
-  const user = await User.findOne({ username });
+const join = async (userId: string, chatId: string) => {
+  const user = await User.findById(userId);
   const chat = await Chat.findById(chatId);
   if (!user || !chat) return;
 
@@ -38,8 +38,8 @@ const join = async (username: string, chatId: string) => {
   await chat.save();
 };
 
-const leave = async (username: string, chatId: string) => {
-  const user = await User.findOne({ username });
+const leave = async (userId: string, chatId: string) => {
+  const user = await User.findById(userId);
   const chat = await Chat.findById(chatId);
   if (!user || !chat) return;
 
