@@ -1,16 +1,33 @@
 import { Schema, Types, model } from 'mongoose';
-import { IChat } from '../chat/chat.model';
+import { ChatSchema, ChatType } from '../chat/chat.model';
 
-export type IUser = {
+export type UserType = {
+  id: string;
   username: string;
-  joinedChats: Types.DocumentArray<IChat>;
+  joinedChats: ChatType[];
 };
 
-const userSchema = new Schema<IUser>({
-  username: { type: String, required: true },
-  joinedChats: [{ type: Schema.Types.ObjectId, ref: 'Chat', required: true }],
-});
+export type UserSchema = {
+  username: string;
+  joinedChats: Types.DocumentArray<ChatSchema>;
+};
 
-const User = model<IUser>('User', userSchema);
+const userSchema = new Schema<UserSchema>(
+  {
+    username: { type: String, required: true },
+    joinedChats: [{ type: Schema.Types.ObjectId, ref: 'Chat', required: true }],
+  },
+  {
+    toObject: {
+      transform: (doc, ret) => {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.__v;
+      },
+    },
+  },
+);
+
+const User = model<UserSchema>('User', userSchema);
 
 export default User;

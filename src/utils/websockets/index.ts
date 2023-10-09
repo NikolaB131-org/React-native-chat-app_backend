@@ -12,13 +12,13 @@ const reverseClientsMap = new Map<string, WebSocket>();
 const start = (server: http.Server) => {
   wss = new WebSocketServer({ server });
   wss.on('connection', (ws, request) => connection(ws, request));
-}
+};
 
 const connection = async (ws: WebSocket, request: http.IncomingMessage) => {
   const userId: string = request.headers.authorization?.split(' ')[1] ?? '';
   const isUserExists = await User.exists({ _id: userId }).catch(() => false);
   const isUserConnected = reverseClientsMap.has(userId);
-  if (!isUserExists || isUserConnected) { // TODO возможно сделеать двойную мапу
+  if (!isUserExists || isUserConnected) {
     ws.close();
     return;
   }
@@ -41,7 +41,7 @@ const connection = async (ws: WebSocket, request: http.IncomingMessage) => {
   ws.onclose = () => {
     clientsMap.delete(ws);
     reverseClientsMap.delete(userId);
-    console.log(`User ${userId} disconnected`)
+    console.log(`User ${userId} disconnected`);
   };
 };
 

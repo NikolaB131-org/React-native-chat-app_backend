@@ -3,13 +3,15 @@ import ApiError from '../../middlewares/error/ApiError';
 import authService from './auth.service';
 
 const login = async (req: Request, res: Response, next: NextFunction) => {
-  const { username } = req.body;
-  if (!username) {
-    next(ApiError.badRequest('Username required'));
+  try {
+    const { username } = req.body;
+    if (!username) throw ApiError.badRequest('Username required');
+
+    res.json({ userId: await authService.login(username) });
+  } catch (err) {
+    next(err);
     return;
   }
-  await authService.login(username);
-  res.sendStatus(200);
 };
 
 export default {

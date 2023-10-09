@@ -3,13 +3,17 @@ import ApiError from '../../middlewares/error/ApiError';
 import chatService from './chat.service';
 
 const getInfo = async (req: Request, res: Response, next: NextFunction) => {
-  const id = req.params.id;
-  if (!id) {
-    next(ApiError.badRequest('Chat id required'));
+  const userId = req.headers.authorization?.split(' ')[1];
+  const { id } = req.params;
+  try {
+    if (!userId || !id) throw ApiError.badRequest('User id and chat id are required');
+
+    const data = await chatService.getInfo(userId, id);
+    res.json(data);
+  } catch (err) {
+    next(err);
     return;
   }
-  const info = await chatService.getInfo(id);
-  res.json(info);
 };
 
 const create = async (req: Request, res: Response, next: NextFunction) => {

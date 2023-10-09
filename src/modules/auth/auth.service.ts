@@ -1,16 +1,23 @@
+import ApiError from '../../middlewares/error/ApiError';
 import User from './../user/user.model';
 
-const register = async (username: string): Promise<string> => {
+const register = async (username: string): Promise<string | void> => {
+  if (username.length < 2) {
+    throw ApiError.badRequest('User name must contain at least 3 characters');
+  }
   const user = await User.create({ username });
   console.log(`Registered new user: ${username}`);
-  return user._id.toString();
+  return user.id;
 };
 
-const login = async (username: string): Promise<string> => {
+const login = async (username: string): Promise<string | void> => {
   const user = await User.findOne({ username });
-  console.log(`User logged in: ${username}`);
-  if (!user) return await register(username);
-  return user._id.toString();
+  if (user) {
+    console.log(`User logged in: ${username}`);
+    return user.id;
+  } else {
+    return await register(username);
+  }
 };
 
 export default {

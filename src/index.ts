@@ -1,9 +1,10 @@
 import dotenv from 'dotenv';
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import helmet from 'helmet';
 import authRouter from './routes/auth';
 import chatRouter from './routes/chat';
+import ApiError from './middlewares/error/ApiError';
 import errorMiddleware from './middlewares/error/errorMiddleware';
 import websockets from './utils/websockets';
 
@@ -16,6 +17,12 @@ app.use(express.json());
 
 app.use('/auth', authRouter);
 app.use('/chat', chatRouter);
+
+// Рandle wrong route
+app.use((req: Request, res: Response, next: NextFunction) => {
+  next(ApiError.notFound('Not found'));
+  return;
+});
 
 app.use(errorMiddleware);
 
