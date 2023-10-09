@@ -1,11 +1,11 @@
-import Chat, { ChatType } from './chat.model';
+import Chat, { ChatType } from './chats.model';
 import User, { UserType } from '../user/user.model';
 import ApiError from '../../middlewares/error/ApiError';
 
 // Removes field joinedChats from UserType
 type GetInfoResponse = Omit<ChatType, 'users'> & { users: Omit<UserType, 'joinedChats'>[] };
 
-const getInfo = async (userId: string, chatId: string): Promise<GetInfoResponse> => {
+const getChat = async (userId: string, chatId: string): Promise<GetInfoResponse> => {
   const chat = await Chat.findById({ _id: chatId }).populate([
     { path: 'users', select: '_id username' },
     { path: 'messages' },
@@ -60,7 +60,7 @@ const leave = async (userId: string, chatId: string): Promise<void> => {
 };
 
 export default {
-  getInfo,
+  getChat,
   create,
   deleteChat,
   join,

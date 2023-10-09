@@ -1,5 +1,5 @@
 import { Schema, Types, model } from 'mongoose';
-import { ChatSchema, ChatType } from '../chat/chat.model';
+import { ChatSchema, ChatType } from '../chats/chats.model';
 
 export type UserType = {
   id: string;

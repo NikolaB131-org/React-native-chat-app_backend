@@ -2,7 +2,7 @@ import WebSocket, { WebSocketServer } from 'ws';
 import http from 'http';
 import { WSSendEvent } from './types';
 import User from '../../modules/user/user.model';
-import Chat from '../../modules/chat/chat.model';
+import Chat from '../../modules/chats/chats.model';
 import Message from '../../modules/message/message.model';
 
 let wss: WebSocket.Server;
