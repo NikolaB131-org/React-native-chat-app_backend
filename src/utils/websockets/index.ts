@@ -2,9 +2,16 @@ import WebSocket, { WebSocketServer } from 'ws';
 import http from 'http';
 import User from '../../modules/user/user.model';
 import Chat from '../../modules/chats/chats.model';
-import Message from '../../modules/message/message.model';
+import Message, { MessageType } from '../../modules/message/message.model';
 import chatsService from '../../modules/chats/chats.service';
-import { WSSendEvent } from './types';
+import {
+  UserDocument,
+  WSClientAllChatsEvent,
+  WSServerAuthEvent,
+  WSClientReceiveMessageEvent,
+  WSServerSendMessageEvent,
+  WSServerAllEvents,
+} from './types';
 
 let wss: WebSocket.Server;
 const clientsMap = new Map<WebSocket, string>();
@@ -16,26 +23,22 @@ const start = (server: http.Server) => {
 };
 
 const connection = async (ws: WebSocket, request: http.IncomingMessage) => {
-  const userId: string = request.headers.authorization?.split(' ')[1] ?? '';
-  const isUserExists = await User.exists({ _id: userId }).catch(() => false);
-  const isUserConnected = reverseClientsMap.has(userId);
-  if (!isUserExists || isUserConnected) {
-    ws.close();
-    return;
-  }
+  let userId = '';
+  let userDocument: UserDocument | null;
 
-  ws.send(JSON.stringify(await chatsService.getAllChats(userId)));
-  clientsMap.set(ws, userId);
-  reverseClientsMap.set(userId, ws);
-  console.log(`User ${userId} connected`);
-
-  ws.onmessage = async event => {
-    const data = JSON.parse(event.data.toString());
+  ws.onmessage = async message => {
+    const data: WSServerAllEvents = JSON.parse(message.data.toString());
 
     try {
       switch (data.event) {
-        case 'send': {
-          await sendEvent(data, userId);
+        case 'auth': {
+          [userId, userDocument] = await authEvent(ws, data);
+          break;
+        }
+        case 'send_message': {
+          if (userDocument) {
+            await sendEvent(data, userDocument);
+          }
           break;
         }
       }
@@ -49,28 +52,55 @@ const connection = async (ws: WebSocket, request: http.IncomingMessage) => {
   ws.onclose = () => {
     clientsMap.delete(ws);
     reverseClientsMap.delete(userId);
-    console.log(`User ${userId} disconnected`);
+    console.log(`websockets: User ${userId} disconnected`);
   };
 };
 
-const sendEvent = async (data: WSSendEvent, userId: string) => {
+const authEvent = async (ws: WebSocket, data: WSServerAuthEvent): Promise<[string, UserDocument | null]> => {
+  const userId = data.token;
+
+  const user = await User.findById(userId);
+  const isUserConnected = reverseClientsMap.has(userId);
+  if (!user || isUserConnected) {
+    ws.close();
+    return ['', null];
+  }
+
+  const sendData: WSClientAllChatsEvent = { event: 'all_chats', chats: await chatsService.getAllChats(userId) };
+  ws.send(JSON.stringify(sendData));
+  clientsMap.set(ws, userId);
+  reverseClientsMap.set(userId, ws);
+  console.log(`websockets: User ${userId} connected`);
+  return [userId, user];
+};
+
+const sendEvent = async (data: WSServerSendMessageEvent, user: UserDocument) => {
   const { chatId, message } = data;
 
-  const senderUser = await User.findById(userId);
   const chat = await Chat.findById(chatId).catch(err => {
     throw new Error('Chat id has an incorrect format');
   });
-  if (!senderUser || !chat) throw new Error('Chat with this id was not found');
+  if (!chat) throw new Error('Chat with this id was not found');
+
+  const messageDocument = await Message.create({ message, sender: user });
+  chat.messages.push(messageDocument);
+  await chat.save();
 
   wss.clients.forEach(async client => {
     const clientId = clientsMap.get(client);
     const isUserJoinedChat = Boolean(await User.findById(clientId).findOne({ joinedChats: chatId }));
 
+    const messageObject: Omit<MessageType, 'joinedChats'> = (
+      await messageDocument.populate({ path: 'sender', select: '-joinedChats' })
+    ).toObject();
+
     if (isUserJoinedChat && client.readyState === WebSocket.OPEN) {
-      const messageObject = await Message.create({ message, senderId: senderUser });
-      chat.messages.push(messageObject);
-      await chat.save();
-      client.send(JSON.stringify({ event: 'receive', userId, chatId, message }));
+      const sendData: WSClientReceiveMessageEvent = {
+        ...messageObject, // returns fields id, message, sender, createdAt
+        event: 'receive_message',
+        chatId,
+      };
+      client.send(JSON.stringify(sendData));
     }
   });
 };

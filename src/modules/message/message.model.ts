@@ -1,22 +1,23 @@
 import { Schema, Types, model } from 'mongoose';
+import { UserType } from '../user/user.model';
 
 export type MessageType = {
   id: string;
   message: string;
-  senderId: string;
+  sender: UserType;
   createdAt: Date;
 };
 
 export type MessageSchema = {
   message: string;
-  senderId: Types.ObjectId;
+  sender: Types.ObjectId;
   createdAt: Date;
 };
 
 const messageSchema = new Schema<MessageSchema>(
   {
     message: { type: String, required: true },
-    senderId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    sender: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   },
   {
     timestamps: { createdAt: true, updatedAt: false },

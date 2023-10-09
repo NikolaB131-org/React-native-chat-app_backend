@@ -5,7 +5,6 @@ import ApiError from '../../middlewares/error/ApiError';
 // Removes field joinedChats from UserType
 type ChatTypeOmittedUsersJoinedChats = Omit<ChatType, 'users'> & { users: Omit<UserType, 'joinedChats'>[] };
 
-
 export type GetAllChatsResponse = ChatTypeOmittedUsersJoinedChats[];
 
 const getAllChats = async (userId: string): Promise<GetAllChatsResponse> => {
@@ -17,7 +16,6 @@ const getAllChats = async (userId: string): Promise<GetAllChatsResponse> => {
 
   return user.joinedChats.map(chat => chat.toObject());
 };
-
 
 export type GetChatResponse = ChatTypeOmittedUsersJoinedChats;
 
@@ -34,7 +32,6 @@ const getChat = async (userId: string, chatId: string): Promise<GetChatResponse>
   return chat.toObject();
 };
 
-
 const create = async (userId: string, chatName: string): Promise<void> => {
   const user = await User.findById(userId);
   if (!user) return;
@@ -43,7 +40,6 @@ const create = async (userId: string, chatName: string): Promise<void> => {
   user.joinedChats.addToSet(chat);
   await user.save();
 };
-
 
 const deleteChat = async (userId: string, chatId: string): Promise<void> => {
   const user = await User.findById(userId);
@@ -54,7 +50,6 @@ const deleteChat = async (userId: string, chatId: string): Promise<void> => {
   await user.save();
   await Chat.deleteOne({ _id: chat });
 };
-
 
 const join = async (userId: string, chatId: string): Promise<void> => {
   const user = await User.findById(userId);
@@ -67,7 +62,6 @@ const join = async (userId: string, chatId: string): Promise<void> => {
   await chat.save();
 };
 
-
 const leave = async (userId: string, chatId: string): Promise<void> => {
   const user = await User.findById(userId);
   const chat = await Chat.findById(chatId);
@@ -78,7 +72,6 @@ const leave = async (userId: string, chatId: string): Promise<void> => {
   chat.users.remove(user);
   await chat.save();
 };
-
 
 export default {
   getAllChats,
