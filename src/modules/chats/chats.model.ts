@@ -4,7 +4,7 @@ import { MessageSchema, MessageType } from '../message/message.model';
 
 export type ChatType = {
   id: string;
-  imageUrl: string;
+  imageUrl?: string;
   name: string;
   creatorId: string;
   users: UserType[];
@@ -12,7 +12,7 @@ export type ChatType = {
 };
 
 export type ChatSchema = {
-  imageUrl: string;
+  imageUrl?: string;
   name: string;
   creatorId: Types.ObjectId;
   users: Types.DocumentArray<UserSchema>;
@@ -21,7 +21,7 @@ export type ChatSchema = {
 
 const chatSchema = new Schema<ChatSchema>(
   {
-    imageUrl: { type: String, required: true },
+    imageUrl: String,
     name: { type: String, required: true },
     creatorId: { type: Schema.Types.ObjectId, required: true },
     users: [{ type: Schema.Types.ObjectId, ref: 'User', required: true }],

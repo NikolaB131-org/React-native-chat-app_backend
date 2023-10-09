@@ -3,9 +3,9 @@ import ApiError from '../../middlewares/error/ApiError';
 import chatsService from './chats.service';
 
 const getChat = async (req: Request, res: Response, next: NextFunction) => {
-  const userId = req.headers.authorization?.split(' ')[1];
-  const { id } = req.params;
   try {
+    const userId = req.headers.authorization?.split(' ')[1];
+    const { id } = req.params;
     if (!userId || !id) throw ApiError.badRequest('User id and chat id are required');
 
     const data = await chatsService.getChat(userId, id);

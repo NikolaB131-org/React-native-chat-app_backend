@@ -3,7 +3,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import helmet from 'helmet';
 import authRouter from './routes/auth';
-import chatRouter from './routes/chat';
+import chatsRouter from './routes/chats';
 import ApiError from './middlewares/error/ApiError';
 import errorMiddleware from './middlewares/error/errorMiddleware';
 import websockets from './utils/websockets';
@@ -16,7 +16,7 @@ app.use(helmet());
 app.use(express.json());
 
 app.use('/auth', authRouter);
-app.use('/chat', chatRouter);
+app.use('/chats', chatsRouter);
 
 // Рandle wrong route
 app.use((req: Request, res: Response, next: NextFunction) => {

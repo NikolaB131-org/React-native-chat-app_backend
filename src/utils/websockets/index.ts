@@ -1,9 +1,10 @@
 import WebSocket, { WebSocketServer } from 'ws';
 import http from 'http';
-import { WSSendEvent } from './types';
 import User from '../../modules/user/user.model';
 import Chat from '../../modules/chats/chats.model';
 import Message from '../../modules/message/message.model';
+import chatsService from '../../modules/chats/chats.service';
+import { WSSendEvent } from './types';
 
 let wss: WebSocket.Server;
 const clientsMap = new Map<WebSocket, string>();
@@ -23,17 +24,24 @@ const connection = async (ws: WebSocket, request: http.IncomingMessage) => {
     return;
   }
 
-  console.log(`User ${userId} connected`);
+  ws.send(JSON.stringify(await chatsService.getAllChats(userId)));
   clientsMap.set(ws, userId);
   reverseClientsMap.set(userId, ws);
+  console.log(`User ${userId} connected`);
 
-  ws.onmessage = event => {
+  ws.onmessage = async event => {
     const data = JSON.parse(event.data.toString());
 
-    switch (data.event) {
-      case 'send': {
-        sendEvent(data, userId);
-        break;
+    try {
+      switch (data.event) {
+        case 'send': {
+          await sendEvent(data, userId);
+          break;
+        }
+      }
+    } catch (error) {
+      if (error instanceof Object && 'message' in error && typeof error.message === 'string') {
+        ws.send(JSON.stringify({ errMessage: error.message }));
       }
     }
   };
@@ -49,8 +57,10 @@ const sendEvent = async (data: WSSendEvent, userId: string) => {
   const { chatId, message } = data;
 
   const senderUser = await User.findById(userId);
-  const chat = await Chat.findById(chatId);
-  if (!senderUser || !chat) return;
+  const chat = await Chat.findById(chatId).catch(err => {
+    throw new Error('Chat id has an incorrect format');
+  });
+  if (!senderUser || !chat) throw new Error('Chat with this id was not found');
 
   wss.clients.forEach(async client => {
     const clientId = clientsMap.get(client);
