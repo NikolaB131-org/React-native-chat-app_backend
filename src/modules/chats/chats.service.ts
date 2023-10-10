@@ -1,23 +1,25 @@
 import Chat, { ChatType } from './chats.model';
-import User, { UserType } from '../user/user.model';
+import User from '../user/user.model';
 import ApiError from '../../middlewares/error/ApiError';
 
-// Removes field joinedChats from UserType
-type ChatTypeOmittedUsersJoinedChats = Omit<ChatType, 'users'> & { users: Omit<UserType, 'joinedChats'>[] };
-
-export type GetAllChatsResponse = ChatTypeOmittedUsersJoinedChats[];
+export type GetAllChatsResponse = ChatType[];
 
 const getAllChats = async (userId: string): Promise<GetAllChatsResponse> => {
-  const user = await User.findById(userId).populate({
-    path: 'joinedChats',
-    populate: [{ path: 'users', select: '-joinedChats' }, 'messages'],
-  });
+  const user = await User.findById(userId);
   if (!user) throw ApiError.notFound('User with this id not found');
 
-  return user.joinedChats.map(chat => chat.toObject());
+  return (
+    (await user.populate({
+      path: 'joinedChats',
+      populate: [
+        { path: 'users', select: '-joinedChats' },
+        { path: 'messages', populate: { path: 'sender', select: '-joinedChats' } },
+      ],
+    })
+  )).joinedChats.map(chat => chat.toObject());
 };
 
-export type GetChatResponse = ChatTypeOmittedUsersJoinedChats;
+export type GetChatResponse = ChatType;
 
 const getChat = async (userId: string, chatId: string): Promise<GetChatResponse> => {
   const chat = await Chat.findById({ _id: chatId }).populate([
@@ -44,7 +46,8 @@ const create = async (userId: string, chatName: string): Promise<void> => {
 const deleteChat = async (userId: string, chatId: string): Promise<void> => {
   const user = await User.findById(userId);
   const chat = await Chat.findById(chatId);
-  if (!user || !chat || !chat.creatorId.equals(user._id)) return;
+  if (!user || !chat) return;
+  if (!chat.creatorId.equals(user._id)) throw ApiError.forbidden('User is not a creator of this chat');
 
   user.joinedChats.remove(chat);
   await user.save();

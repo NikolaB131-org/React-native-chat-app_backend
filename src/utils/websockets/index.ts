@@ -27,9 +27,9 @@ const connection = async (ws: WebSocket, request: http.IncomingMessage) => {
   let userDocument: UserDocument | null;
 
   ws.onmessage = async message => {
-    const data: WSServerAllEvents = JSON.parse(message.data.toString());
-
     try {
+      const data: WSServerAllEvents = JSON.parse(message.data.toString());
+
       switch (data.event) {
         case 'auth': {
           [userId, userDocument] = await authEvent(ws, data);
@@ -70,6 +70,7 @@ const authEvent = async (ws: WebSocket, data: WSServerAuthEvent): Promise<[strin
   ws.send(JSON.stringify(sendData));
   clientsMap.set(ws, userId);
   reverseClientsMap.set(userId, ws);
+
   console.log(`websockets: User ${userId} connected`);
   return [userId, user];
 };

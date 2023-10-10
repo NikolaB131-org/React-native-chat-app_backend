@@ -5,7 +5,7 @@ export type MessageType = {
   id: string;
   message: string;
   sender: UserType;
-  createdAt: Date;
+  createdAt: string;
 };
 
 export type MessageSchema = {
@@ -23,10 +23,10 @@ const messageSchema = new Schema<MessageSchema>(
     timestamps: { createdAt: true, updatedAt: false },
     toObject: {
       transform: (doc, ret) => {
-        ret.id = ret._id;
         delete ret._id;
         delete ret.__v;
       },
+      virtuals: true,
     },
   },
 );
