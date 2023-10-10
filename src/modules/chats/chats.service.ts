@@ -34,13 +34,14 @@ const getChat = async (userId: string, chatId: string): Promise<GetChatResponse>
   return chat.toObject();
 };
 
-const create = async (userId: string, chatName: string): Promise<void> => {
+const create = async (userId: string, chatName: string): Promise<ChatType> => {
   const user = await User.findById(userId);
-  if (!user) return;
+  if (!user) throw ApiError.notFound('User with this id not found');
 
   const chat = await Chat.create({ name: chatName, creatorId: user, users: [user] });
   user.joinedChats.addToSet(chat);
   await user.save();
+  return chat.toObject();
 };
 
 const updateName = async (userId: string, chatId: string, name: string): Promise<void> => {

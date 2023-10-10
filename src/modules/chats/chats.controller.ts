@@ -24,8 +24,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       next(ApiError.badRequest('User id and chat name are required'));
       return;
     }
-    await chatsService.create(userId, name);
-    res.sendStatus(200);
+    const data = await chatsService.create(userId, name);
+    res.json(data);
   } catch (err) {
     next(err);
     return;
