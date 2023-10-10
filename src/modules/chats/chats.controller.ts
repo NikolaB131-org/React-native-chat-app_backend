@@ -32,6 +32,23 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const updateName = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.headers.authorization?.split(' ')[1];
+    const { id } = req.params;
+    const name = req.query.name?.toString();
+    if (!userId || !id || !name) {
+      next(ApiError.badRequest('User id, chat id, chat name are required'));
+      return;
+    }
+    await chatsService.updateName(userId, id, name);
+    res.sendStatus(200);
+  } catch (err) {
+    next(err);
+    return;
+  }
+};
+
 const deleteChat = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.headers.authorization?.split(' ')[1];
@@ -83,6 +100,7 @@ const leave = async (req: Request, res: Response, next: NextFunction) => {
 export default {
   getChat,
   create,
+  updateName,
   deleteChat,
   join,
   leave,

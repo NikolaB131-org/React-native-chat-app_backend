@@ -6,8 +6,7 @@ const chatsRouter = express.Router();
 chatsRouter.route('/:id')
   .get(chatsController.getChat)
   .delete(chatsController.deleteChat)
-
-chatsRouter.post('/create', chatsController.create);
+  .patch(chatsController.updateName)
 
 chatsRouter.post('/join/:id', chatsController.join);
 chatsRouter.delete('/leave/:id', chatsController.leave);

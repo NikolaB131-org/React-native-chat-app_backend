@@ -43,6 +43,15 @@ const create = async (userId: string, chatName: string): Promise<void> => {
   await user.save();
 };
 
+const updateName = async (userId: string, chatId: string, name: string): Promise<void> => {
+  const chat = await Chat.findById(chatId);
+  if (!chat) throw ApiError.notFound('Chat with this id not found');
+
+  if (!chat.creatorId.equals(userId)) throw ApiError.forbidden('User is not a creator of this chat');
+
+  await chat.updateOne({ name });
+};
+
 const deleteChat = async (userId: string, chatId: string): Promise<void> => {
   const user = await User.findById(userId);
   const chat = await Chat.findById(chatId);
@@ -80,6 +89,7 @@ export default {
   getAllChats,
   getChat,
   create,
+  updateName,
   deleteChat,
   join,
   leave,
