@@ -24,7 +24,7 @@ const start = (server: http.Server) => {
 
 const connection = async (ws: WebSocket, request: http.IncomingMessage) => {
   let userId = '';
-  let userDocument: UserDocument | null;
+  let userDocument: UserDocument | null; // user data
 
   ws.onmessage = async message => {
     try {

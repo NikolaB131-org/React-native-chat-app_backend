@@ -65,6 +65,21 @@ const deleteChat = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const search = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.headers.authorization?.split(' ')[1];
+    if (!userId) {
+      next(ApiError.badRequest('User id are required'));
+      return;
+    }
+    const text = req.query.text?.toString() ?? '';
+    res.json(await chatsService.search(userId, text));
+  } catch (err) {
+    next(err);
+    return;
+  }
+};
+
 const join = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.headers.authorization?.split(' ')[1];
@@ -74,7 +89,8 @@ const join = async (req: Request, res: Response, next: NextFunction) => {
       return;
     }
     await chatsService.join(userId, id);
-    res.sendStatus(200);
+    const data = await chatsService.getChat(userId, id)
+    res.json(data);
   } catch (err) {
     next(err);
     return;
@@ -102,6 +118,7 @@ export default {
   create,
   updateName,
   deleteChat,
+  search,
   join,
   leave,
 };

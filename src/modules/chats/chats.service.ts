@@ -9,14 +9,14 @@ const getAllChats = async (userId: string): Promise<GetAllChatsResponse> => {
   if (!user) throw ApiError.notFound('User with this id not found');
 
   return (
-    (await user.populate({
+    await user.populate({
       path: 'joinedChats',
       populate: [
         { path: 'users', select: '-joinedChats' },
         { path: 'messages', populate: { path: 'sender', select: '-joinedChats' } },
       ],
     })
-  )).joinedChats.map(chat => chat.toObject());
+  ).joinedChats.map(chat => chat.toObject());
 };
 
 export type GetChatResponse = ChatType;
@@ -63,6 +63,17 @@ const deleteChat = async (userId: string, chatId: string): Promise<void> => {
   await Chat.deleteOne({ _id: chat });
 };
 
+export type ChatsSearchResponse = Pick<ChatType, 'id' | 'imageUrl' | 'name' | 'users'>[];
+
+const search = async (userId: string, text: string): Promise<ChatsSearchResponse[]> => {
+  const joinedChatsIds = (await User.findById(userId).populate('joinedChats'))?.joinedChats.map(chat => chat.id);
+  return (
+    await Chat.find({ $and: [{ _id: { $nin: joinedChatsIds } }, { name: { $regex: text, $options: 'i' } }] })
+      .limit(100)
+      .select('name imageUrl users')
+  ).map(chat => chat.toObject());
+};
+
 const join = async (userId: string, chatId: string): Promise<void> => {
   const user = await User.findById(userId);
   const chat = await Chat.findById(chatId);
@@ -91,6 +102,7 @@ export default {
   create,
   updateName,
   deleteChat,
+  search,
   join,
   leave,
 };

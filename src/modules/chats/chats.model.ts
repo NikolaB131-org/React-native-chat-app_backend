@@ -38,6 +38,8 @@ const chatSchema = new Schema<ChatSchema>(
   },
 );
 
+chatSchema.index({ name: 'text' });
+
 const Chat = model<ChatSchema>('Chat', chatSchema);
 
 export default Chat;
