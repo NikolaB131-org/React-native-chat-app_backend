@@ -6,7 +6,7 @@ import authRouter from './routes/auth';
 import chatsRouter from './routes/chats';
 import ApiError from './middlewares/error/ApiError';
 import errorMiddleware from './middlewares/error/errorMiddleware';
-import websockets from './utils/websockets';
+import websockets from './modules/websockets';
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 const app = express();
