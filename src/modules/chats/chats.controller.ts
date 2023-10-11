@@ -73,7 +73,8 @@ const search = async (req: Request, res: Response, next: NextFunction) => {
       return;
     }
     const text = req.query.text?.toString() ?? '';
-    res.json(await chatsService.search(userId, text));
+    const data = await chatsService.search(userId, text);
+    res.json(data);
   } catch (err) {
     next(err);
     return;
