@@ -33,7 +33,7 @@ jobs:
           cp -r dist/. ${{env.path}}
           cp package.json ${{env.path}}
           cp package-lock.json ${{env.path}}
-          cp -r /var/environments/chat-app.nikolab131.xyz/. ${{env.path}}
+          cp -r /var/environments/chat-app.nikolab131.xyz/backend/. ${{env.path}}
       - name: Install dependencies
         run: |
           cd ${{env.path}}
