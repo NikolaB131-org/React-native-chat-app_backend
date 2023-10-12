@@ -70,3 +70,9 @@ npm start
 ```bash
 npm run build
 ```
+
+
+## TODO
+
+- Chat delete, change chat name, change image should be transmitted over websockets
+- Functions in services needs to be reuse each other in clever way
