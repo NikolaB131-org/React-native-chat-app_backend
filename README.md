@@ -14,6 +14,7 @@
 - Error handling
 - Messages are sent via websockets
 - Authorization is temporarily done not using tokens, but simply using the userId from the database
+- CI/CD workflow
 
 ## Routes
 
@@ -47,14 +48,16 @@ Every message should be in format: `{event: 'name of event', data fields...}`
 
 ## How to run
 
-1. Make sure you have MongoDB version 7 installed
+1. Make sure you have MongoDB version 7 installed and running
 
-1. Install dependencies
+2. You can add `PORT` variable to .env.development to specify a different port instead of `3001`
+
+3. Install dependencies
 ```bash
 npm i
 ```
 
-3. Run server in development mode
+4. Run server in development mode
 ```bash
 npm start
 ```

@@ -1,0 +1,51 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - 'main'
+
+env:
+  path: /var/www/chat-app.nikolab131.xyz/backend
+
+jobs:
+  build:
+    name: 'Build'
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Clean previous files
+        run: rm -rf ${{env.path}}
+      - name: Copy
+        run: |
+          mkdir -p ${{env.path}}
+          cp -r dist/. ${{env.path}}
+          cp package.json ${{env.path}}
+          cp package-lock.json ${{env.path}}
+          cp -r /var/environments/chat-app.nikolab131.xyz/. ${{env.path}}
+      - name: Install dependencies
+        run: |
+          cd ${{env.path}}
+          npm ci
+
+  deploy:
+    needs: build
+    name: 'Deploy'
+    runs-on: self-hosted
+
+    steps:
+      - name: Restart pm2
+        run: pm2 -s restart /var/configs/pm2_ecosystem.config.js --env production --only "React-native-chat-app_backend"
+      - name: Save pm2
+        run: pm2 -s save
