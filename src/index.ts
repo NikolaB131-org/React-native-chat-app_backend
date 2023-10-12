@@ -8,7 +8,7 @@ import ApiError from './middlewares/error/ApiError';
 import errorMiddleware from './middlewares/error/errorMiddleware';
 import websockets from './modules/websockets';
 
-dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
+dotenv.config({ path: __dirname + `/.env.${process.env.NODE_ENV}` });
 const app = express();
 const PORT = process.env.PORT ?? 3001;
 
@@ -28,7 +28,11 @@ app.use(errorMiddleware);
 
 (async () => {
   console.log('Connecting database...');
-  await mongoose.connect(`mongodb://${process.env.MONGO_DB_URL}/${process.env.MONGO_DB_NAME}`);
+  try {
+    await mongoose.connect(`mongodb://${process.env.MONGO_DB_URL}/${process.env.MONGO_DB_NAME}`);
+  } catch (error) {
+    console.log(`Database connection error: ${error}`);
+  }
   console.log('Database connected');
 
   const server = app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
