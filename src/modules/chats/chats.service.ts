@@ -24,7 +24,7 @@ export type GetChatResponse = ChatType;
 const getChat = async (userId: string, chatId: string): Promise<GetChatResponse> => {
   const chat = await Chat.findById({ _id: chatId }).populate([
     { path: 'users', select: '-joinedChats' },
-    { path: 'messages' },
+    { path: 'messages', populate: { path: 'sender', select: '-joinedChats' } },
   ]);
   if (!chat) throw ApiError.notFound('Chat with this id not found');
 
@@ -41,7 +41,7 @@ const create = async (userId: string, chatName: string): Promise<ChatType> => {
   const chat = await Chat.create({ name: chatName, creatorId: user, users: [user] });
   user.joinedChats.addToSet(chat);
   await user.save();
-  return chat.toObject();
+  return (await chat.populate([{ path: 'users', select: '-joinedChats' }, { path: 'messages' }])).toObject();
 };
 
 const updateName = async (userId: string, chatId: string, name: string): Promise<void> => {
@@ -69,9 +69,10 @@ export type ChatsSearchResponse = Pick<ChatType, 'id' | 'imageUrl' | 'name' | 'u
 const search = async (userId: string, text: string): Promise<ChatsSearchResponse[]> => {
   const joinedChatsIds = (await User.findById(userId).populate('joinedChats'))?.joinedChats.map(chat => chat.id);
   return (
-    await Chat.find({ $and: [{ _id: { $nin: joinedChatsIds } }, { name: { $regex: text, $options: 'i' } }] })
-      .limit(100)
-      .select('name imageUrl users')
+    await Chat.find(
+      { $and: [{ _id: { $nin: joinedChatsIds } }, { name: { $regex: text, $options: 'i' } }] },
+      { name: 1, imageUrl: 1, users: 1, creatorId: 1 },
+    ).limit(100)
   ).map(chat => chat.toObject());
 };
 

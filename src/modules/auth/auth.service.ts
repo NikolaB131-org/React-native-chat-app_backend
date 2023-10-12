@@ -2,7 +2,7 @@ import ApiError from '../../middlewares/error/ApiError';
 import User from './../user/user.model';
 
 const register = async (username: string): Promise<string | void> => {
-  if (username.length < 2) {
+  if (username.length < 3) {
     throw ApiError.badRequest('User name must contain at least 3 characters');
   }
   const user = await User.create({ username });
