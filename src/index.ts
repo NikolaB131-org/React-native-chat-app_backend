@@ -8,7 +8,15 @@ import ApiError from './middlewares/error/ApiError';
 import errorMiddleware from './middlewares/error/errorMiddleware';
 import websockets from './modules/websockets';
 
-dotenv.config({ path: __dirname + `/.env.${process.env.NODE_ENV}` });
+switch (process.env.NODE_ENV) {
+  case 'development': {
+    dotenv.config({ path: `.env.development` });
+  }
+  case 'production': {
+    dotenv.config({ path: __dirname + `/.env.production` });
+  }
+}
+
 const app = express();
 const PORT = process.env.PORT ?? 3001;
 
@@ -18,7 +26,7 @@ app.use(express.json());
 app.use('/auth', authRouter);
 app.use('/chats', chatsRouter);
 
-// Рandle wrong route
+// Handle wrong route
 app.use((req: Request, res: Response, next: NextFunction) => {
   next(ApiError.notFound('Not found'));
   return;
@@ -30,11 +38,11 @@ app.use(errorMiddleware);
   console.log('Connecting database...');
   try {
     await mongoose.connect(`mongodb://${process.env.MONGO_DB_URL}/${process.env.MONGO_DB_NAME}`);
-  } catch (error) {
-    console.log(`Database connection error: ${error}`);
-  }
-  console.log('Database connected');
+    console.log('Database connected');
 
-  const server = app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
-  websockets.start(server);
+    const server = app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+    websockets.start(server);
+  } catch (error) {
+    console.log(`Server startup error: ${error}`);
+  }
 })();
