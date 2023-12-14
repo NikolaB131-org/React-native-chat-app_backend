@@ -11,8 +11,8 @@ class ApiError {
     return new ApiError(400, message);
   }
 
-  static unauthorized(message: string) {
-    return new ApiError(401, message);
+  static unauthorized() {
+    return new ApiError(401, 'User is not logged in');
   }
 
   static forbidden(message: string) {

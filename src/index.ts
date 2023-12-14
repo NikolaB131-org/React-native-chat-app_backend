@@ -7,6 +7,7 @@ import chatsRouter from './routes/chats';
 import ApiError from './middlewares/error/ApiError';
 import errorMiddleware from './middlewares/error/errorMiddleware';
 import websockets from './modules/websockets';
+import authMiddleware from './middlewares/authMiddleware';
 
 switch (process.env.NODE_ENV) {
   case 'development': {
@@ -24,6 +25,7 @@ app.use(helmet());
 app.use(express.json());
 
 app.use('/auth', authRouter);
+app.use(authMiddleware); // next routes requires authorization
 app.use('/chats', chatsRouter);
 
 // Handle wrong route

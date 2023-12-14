@@ -4,17 +4,20 @@ import { ChatSchema, ChatType } from '../chats/chats.model';
 export type UserType = {
   id: string;
   username: string;
+  saltWithHash: string;
   joinedChats: ChatType[];
 };
 
 export type UserSchema = {
   username: string;
+  saltWithHash: string;
   joinedChats: Types.DocumentArray<ChatSchema>;
 };
 
 const userSchema = new Schema<UserSchema>(
   {
     username: { type: String, required: true },
+    saltWithHash: { type: String, required: true },
     joinedChats: [{ type: Schema.Types.ObjectId, ref: 'Chat', required: true }],
   },
   {

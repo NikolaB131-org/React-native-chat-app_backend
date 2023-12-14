@@ -4,10 +4,10 @@ import authService from './auth.service';
 
 const login = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { username } = req.body;
-    if (!username) throw ApiError.badRequest('Username required');
+    const { username, password } = req.body;
+    if (!username || !password) throw ApiError.badRequest('Username and password are required');
 
-    res.json({ userId: await authService.login(username) });
+    res.json({ userId: await authService.login(username, password) });
   } catch (err) {
     next(err);
     return;
